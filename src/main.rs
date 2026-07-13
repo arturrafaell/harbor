@@ -1,3 +1,4 @@
+use std::io::Read;
 use std::net::TcpListener;
 
 fn main() {
@@ -8,9 +9,22 @@ fn main() {
 
     println!("Harbor is listening on http://{address}");
 
-    let _connection = listener
+    let (mut stream, client_address) = listener
         .accept()
         .expect("Failed to accept the incoming connection");
 
-    println!("Harbor accepted its first connection.");
+    println!("Connection accepted from {client_address}");
+
+    let mut buffer = [0_u8; 1024];
+
+    let bytes_read = stream
+        .read(&mut buffer)
+        .expect("Failed to read data from the connection");
+
+    let request = String::from_utf8_lossy(&buffer[..bytes_read]);
+
+    println!("Bytes received: {bytes_read}");
+    println!("----- Raw request -----");
+    println!("{request}");
+    println!("-----------------------");
 }
