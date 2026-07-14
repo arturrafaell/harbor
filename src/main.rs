@@ -1,4 +1,4 @@
-use std::io::Read;
+use std::io::{Read, Write};
 use std::net::TcpListener;
 
 fn main() {
@@ -27,4 +27,14 @@ fn main() {
     println!("----- Raw request -----");
     println!("{request}");
     println!("-----------------------");
+    let response = "HTTP/1.1 200 OK\r\n\
+      Content-Type: text/plain\r\n\
+      Content-Length: 18\r\n\
+      \r\n\
+      Hello from Harbor!";
+  
+    stream
+      .write_all(response.as_bytes())
+      .expect("Failed to send response");
+
 }
