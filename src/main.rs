@@ -1,3 +1,5 @@
+mod request;
+
 use std::io::{Read, Write};
 use std::net::TcpListener;
 
@@ -21,20 +23,28 @@ fn main() {
         .read(&mut buffer)
         .expect("Failed to read data from the connection");
 
-    let request = String::from_utf8_lossy(&buffer[..bytes_read]);
+    let request_text = String::from_utf8_lossy(&buffer[..bytes_read]);
 
-    println!("Bytes received: {bytes_read}");
-    println!("----- Raw request -----");
-    println!("{request}");
-    println!("-----------------------");
-    let response = "HTTP/1.1 200 OK\r\n\
-      Content-Type: text/plain\r\n\
-      Content-Length: 18\r\n\
-      \r\n\
-      Hello from Harbor!";
-  
+    let (method, path, version) =
+        request::parse_request_line(&request_text);
+
+    println!("Method: {method}");
+    println!("Path: {path}");
+    println!("Version: {version}");
+
+    let body = "Hello from Harbor!";
+
+    let response = format!(
+        "HTTP/1.1 200 OK\r\n\
+Content-Type: text/plain\r\n\
+Content-Length: {}\r\n\
+\r\n\
+{}",
+        body.len(),
+        body
+    );
+
     stream
-      .write_all(response.as_bytes())
-      .expect("Failed to send response");
-
+        .write_all(response.as_bytes())
+        .expect("Failed to send the HTTP response");
 }
