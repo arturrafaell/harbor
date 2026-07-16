@@ -11,40 +11,43 @@ fn main() {
 
     println!("Harbor is listening on http://{address}");
 
-    let (mut stream, client_address) = listener
-        .accept()
-        .expect("Failed to accept the incoming connection");
+    loop {
+        let (mut stream, client_address) = listener
+            .accept()
+            .expect("Failed to accept the incoming connection");
 
-    println!("Connection accepted from {client_address}");
+        println!("Connection accepted from {client_address}");
 
-    let mut buffer = [0_u8; 1024];
+        let mut buffer = [0_u8; 1024];
 
-    let bytes_read = stream
-        .read(&mut buffer)
-        .expect("Failed to read data from the connection");
+        let bytes_read = stream
+            .read(&mut buffer)
+            .expect("Failed to read data from the connection");
 
-    let request_text = String::from_utf8_lossy(&buffer[..bytes_read]);
+        let request_text =
+            String::from_utf8_lossy(&buffer[..bytes_read]);
 
-    let (method, path, version) =
-        request::parse_request_line(&request_text);
+        let (method, path, version) =
+            request::parse_request_line(&request_text);
 
-    println!("Method: {method}");
-    println!("Path: {path}");
-    println!("Version: {version}");
+        println!("Method: {method}");
+        println!("Path: {path}");
+        println!("Version: {version}");
 
-    let body = "Hello from Harbor!";
+        let body = "Hello from Harbor!";
 
-    let response = format!(
-        "HTTP/1.1 200 OK\r\n\
-Content-Type: text/plain\r\n\
-Content-Length: {}\r\n\
-\r\n\
-{}",
-        body.len(),
-        body
-    );
+        let response = format!(
+            "HTTP/1.1 200 OK\r\n\
+            Content-Type: text/plain\r\n\
+            Content-Length: {}\r\n\
+            \r\n\
+        {}",
+            body.len(),
+            body
+        );
 
-    stream
-        .write_all(response.as_bytes())
-        .expect("Failed to send the HTTP response");
+        stream
+            .write_all(response.as_bytes())
+            .expect("Failed to send the HTTP response");
+    }
 }
